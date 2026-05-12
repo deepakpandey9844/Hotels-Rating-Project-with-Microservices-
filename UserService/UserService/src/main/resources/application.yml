@@ -1,0 +1,97 @@
+spring:
+  config:
+    import: "optional:configserver:http://localhost:8085"
+  application:
+    name: Servertest
+  datasource:
+    url: jdbc:mysql://localhost:3309/microservices
+    username: root
+    password: iamAshu@job1
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        format_sql: true
+    show-sql: true
+  thymeleaf:
+    cache: false
+    debug: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://dev-26937441.okta.com/oauth2/default
+      client:
+        registration:
+          myint-back-client:
+            authorization-grant-type: client_credentials
+            scope: internal
+            client-id: 0oamnjem22Hx3IMFD5d7
+            client-secret: cDtquFc8AdriHOsGhzj4-JAWJcKddaOUE3CnDGKXVYj_cGLeZO5MckPARSmoKI0L
+        provider:
+          okta:
+            issuer-uri: https://dev-26937441.okta.com/oauth2/default
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    prefer-ip-address: true
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.jwt.example: DEBUG
+    org.springframework.web.client.RestTemplate: DEBUG
+    com.lcwd.user.service: DEBUG
+    root: INFO
+
+management:
+  health:
+    circuitbreaker:
+      enabled: true  # Enable the circuit breaker health indicator
+  endpoint:
+    web:
+      exposure:
+        include: health  # Expose health details through the web endpoint
+    health:
+      show-details: always
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      ratingHotelBreaker:
+        registerHealthIndicator: true
+        fallbackMethod: ratingHotelFallBack
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 50
+        minimumNumberOfCalls: 5
+        automaticTransitionFromOpenToHalfOpen: true
+        waitDurationInOpenState: 6s
+        slidingWindowSize: 10
+        slidingWindowType: COUNT_BASED  # Use count-based sliding window
+        timeoutDuration: 5s
+  retry:
+    instances:
+      ratingHotelService:
+        max-attempts: 3
+        wait-duration: 5s
+  ratelimiter:
+    instances:
+      userRateLimiter:
+        limit-refresh-period: 4s
+        limit-for-period: 2
+        timeout-duration: 3s
+
+# Okta configuration for API gateway
+okta:
+  oauth2:
+    issuer: https://dev-26937441.okta.com/oauth2/default
+    audience: api://default

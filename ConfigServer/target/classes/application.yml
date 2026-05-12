@@ -1,0 +1,14 @@
+spring:
+  application:
+    name: ConfigServer
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/Ashutoshsrivastava11/Hotels-Rating-Project-with-Microservices
+          clone-on-start: true  # Ensures the repository is cloned when the server starts
+        default-label: main     # Specifies the branch to use (update if needed)
+        bootstrap: true         # Loads configurations during bootstrap (optional, for Config Clients)
+
+server:
+  port: 8085   # Port on which the Config Server runs

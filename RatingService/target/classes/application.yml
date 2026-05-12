@@ -1,0 +1,48 @@
+spring:
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/microservices  # MongoDB connection URI with database name
+  application:
+    name: RatingService  # Application name for service discovery and identification
+
+server:
+  port: 8082  # Set the application to run on port 8082
+
+eureka:
+  client:
+    fetch-registry: true
+    register-with-eureka: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+    prefer-ip-address: true
+
+management:
+  health:
+    circuitbreaker:
+      enabled: true  # Enable the circuit breaker health indicator
+  endpoint:
+    web:
+      exposure:
+        include: health  # Expose health details through the web endpoint
+    health:
+      show-details: always
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      ratingHotelBreaker:
+        registerHealthIndicator: true
+        fallbackMethod: fallbackRatings
+        eventConsumerBufferSize: 10
+        failureRateThreshold: 10
+        minimumNumberOfCalls: 1
+        automaticTransitionFromOpenToHalfOpen: true
+        waitDurationInOpenState: 5s
+        slidingWindowSize: 5
+        slidingWindowType: COUNT_BASED  # Use count-based sliding window
+        timeoutDuration: 5s  # Correct placement under the circuit breaker instance
+# Okta configuration for API gateway
+okta:
+  oauth2:
+    issuer: https://dev-26937441.okta.com/oauth2/default
+    audience: api://default
